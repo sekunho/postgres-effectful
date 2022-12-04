@@ -8,7 +8,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Effectful.Hasql.Session.Effect (runDB, query, DB) where
+module Effectful.Hasql.Effect (runDB, query, DB) where
 
 import Data.Kind (Type)
 import Effectful (Dispatch (Static), DispatchOf, Eff, Effect, IOE, type (:>))
