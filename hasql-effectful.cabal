@@ -59,7 +59,7 @@ library
     import:           warnings
 
     -- Modules exported by the library.
-    exposed-modules:  MyLib
+    exposed-modules: Effectful.Hasql.Session.Effect
 
     -- Modules included in this library but not exported.
     -- other-modules:
@@ -68,7 +68,11 @@ library
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.16.3.0
+    build-depends:    base ^>=4.16
+                    , effectful-core ^>=2.2
+                    , hasql ^>=1.6
+                    , hasql-pool ^>=0.8
+                    , hasql-th ^>=0.4
 
     -- Directories containing source files.
     hs-source-dirs:   src
@@ -100,5 +104,9 @@ test-suite hasql-effectful-test
 
     -- Test dependencies.
     build-depends:
-        base ^>=4.16.3.0,
-        hasql-effectful
+        base ^>=4.16
+      , effectful-core ^>=2.2
+      , hasql ^>=1.6
+      , hasql-effectful
+      , hasql-pool ^>=0.8
+      , hasql-th ^>=0.4
