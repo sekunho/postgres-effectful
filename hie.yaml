@@ -2,3 +2,9 @@ cradle:
   cabal:
     - path: "src"
       component: "lib:hasql-effectful"
+
+    - path: "pool-src"
+      component: "hasql-effectful:lib:hasql-pool-effectful"
+
+    - path: "test"
+      component: "hasql-effectful:test:hasql-effectful-test"
