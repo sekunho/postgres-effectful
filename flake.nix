@@ -14,11 +14,19 @@
             final.haskell-nix.project' {
               src = ./.;
               compiler-nix-name = "ghc925";
-              shell.tools = {
-                cabal = {};
-                hlint = {};
-                haskell-language-server = {};
-                fourmolu = {};
+
+              shell = {
+                buildInputs = with pkgs; [
+                  postgresql.lib
+                  haskellPackages.implicit-hie
+                ];
+
+                tools = {
+                  cabal = {};
+                  hlint = {};
+                  haskell-language-server = {};
+                  fourmolu = {};
+                };
               };
             };
         })
