@@ -5,9 +5,16 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Effectful.Hasql (query, runDB) where
+-------------------------------------------------------------------------------
+
+module Effectful.Hasql (DB', query, runDB) where
+
+-------------------------------------------------------------------------------
 
 import Data.Kind (Type)
+
+-------------------------------------------------------------------------------
+
 import Effectful (Dispatch (Static), DispatchOf, Eff, Effect, IOE, type (:>))
 import Effectful.Dispatch.Static (SideEffects (WithSideEffects), StaticRep)
 import qualified Effectful.Dispatch.Static as Static
@@ -15,11 +22,15 @@ import Hasql.Connection (Connection)
 import Hasql.Session (QueryError, Session)
 import qualified Hasql.Session as Session
 
+-------------------------------------------------------------------------------
+
 -- | A single connection DB effect
 data DB' :: Effect
 
 type instance DispatchOf DB' = 'Static 'WithSideEffects
 newtype instance StaticRep DB' = DB' Connection
+
+-------------------------------------------------------------------------------
 
 runDB ::
   forall (es :: [Effect]) (a :: Type).
