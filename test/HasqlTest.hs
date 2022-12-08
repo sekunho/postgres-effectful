@@ -13,7 +13,6 @@ module HasqlTest where
 
 -------------------------------------------------------------------------------
 
-import Data.Either (fromRight)
 import Data.Int (Int32)
 
 -------------------------------------------------------------------------------
@@ -80,6 +79,9 @@ badSelect connection =
 -- Helpers
 
 setup :: IO Connection
-setup = acquire settings >>= pure . fromRight (error "kaboom")
+setup = acquire settings >>= \connection ->
+  case connection of
+    Right connection' -> pure connection'
+    Left e -> error (show e)
  where
   settings = Connection.settings "localhost" 5432 "postgres" "" "postgres"
