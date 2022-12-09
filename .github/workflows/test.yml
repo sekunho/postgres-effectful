@@ -31,6 +31,8 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        ports:
+          - 5432:5432
 
     steps:
     - uses: actions/checkout@v3
@@ -41,4 +43,16 @@ jobs:
           trusted-public-keys = hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= loony-tools:pr9m4BkM/5/eSTZlkQyRt57Jz7OMBxNSUiMC4FkcNfk= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
           substituters = https://cache.iog.io https://cache.zw3rk.com https://cache.nixos.org/
 
-    - run: nix run .#packages.x86_64-linux.hasql-pool-effectful-test
+    - run: nix build .#packages.x86_64-linux.hasql-pool-effectful-test
+
+    - uses: actions/cache@v3
+      with:
+        path: /nix/store
+        key: ${{ runner.os }}-${{ hashFiles('flake.lock') }}
+
+    - run: |
+        POSTGRES_HOST=postgres \
+        POSTGRES_USER=postgres \
+        POSTGRES_PASSWORD=postgres \
+        POSTGRES_DB_NAME=postgres \
+          nix run .#packages.x86_64-linux.hasql-pool-effectful-test
