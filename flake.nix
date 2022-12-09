@@ -41,7 +41,7 @@
           default = hasql-effectful;
           hasql-effectful = flake.packages."${name}:lib:${name}";
           hasql-pool-effectful = flake.packages."${name}:lib:hasql-pool-effectful";
-          hasql-pool-effectful-test = flake.packages."${name}:test:hasql-effectful-test";
+          hasql-effectful-test = flake.packages."${name}:test:hasql-effectful-test";
         };
       }
   );
