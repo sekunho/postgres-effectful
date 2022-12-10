@@ -71,8 +71,6 @@ library
     build-depends:    base ^>=4.16
                     , effectful-core ^>=2.2
                     , hasql ^>=1.6
-                    , hasql-pool ^>=0.8
-                    , hasql-th ^>=0.4
 
     -- Directories containing source files.
     hs-source-dirs:   src
@@ -99,7 +97,6 @@ library hasql-pool-effectful
                     , hasql ^>=1.6
                     , hasql-effectful
                     , hasql-pool ^>=0.8
-                    , hasql-th ^>=0.4
 
     -- Directories containing source files.
     hs-source-dirs:   pool-src
