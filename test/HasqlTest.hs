@@ -21,7 +21,7 @@ import qualified System.Environment as Environment (lookupEnv)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as Char8 (pack)
 import Effectful (runEff)
-import Effectful.Hasql (query, runDB)
+import Effectful.Hasql (query, runDB')
 import Hasql.Connection (Connection, acquire)
 import qualified Hasql.Connection as Connection
 import Hasql.Session (
@@ -78,13 +78,13 @@ selectSpec = do
 
 select1 :: Connection -> IO (Either QueryError Int32)
 select1 connection =
-  runEff . runDB connection $
+  runEff . runDB' connection $
     let session = Session.statement () [singletonStatement| select 1 :: int |]
      in query session
 
 badSelect :: Connection -> IO (Either QueryError Int32)
 badSelect connection =
-  runEff . runDB connection $
+  runEff . runDB' connection $
     let session =
           Session.statement
             ()
