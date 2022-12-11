@@ -1,0 +1,114 @@
+name: CI
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/test.yml'
+      - 'flake.*'
+      - 'hasql-effectful.cabal'
+      - 'src/**/*'
+      - 'pool-src/**/*'
+      - 'test/**/*'
+      - 'hie.yaml'
+  push:
+    branches: [main]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+
+
+jobs:
+  test-and-build-docs:
+    runs-on: ubuntu-22.04
+
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v18
+        with:
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+            trusted-public-keys = hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= loony-tools:pr9m4BkM/5/eSTZlkQyRt57Jz7OMBxNSUiMC4FkcNfk= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
+            substituters = https://cache.iog.io https://cache.zw3rk.com https://cache.nixos.org/
+
+      - name: Build test package
+        run: nix build .#packages.x86_64-linux.hasql-effectful-test
+
+      - name: Run tests
+        run: nix run .#packages.x86_64-linux.hasql-effectful-test
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB_NAME: postgres
+
+      - name: Build `hasql-effectful` docs
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          nix build .#packages.x86_64-linux.hasql-effectful.doc
+          mv result-doc hasql-effectful-doc
+
+      - name: Build `hasql-pool-effectful` docs
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          nix build .#packages.x86_64-linux.hasql-pool-effectful.doc
+          mv result-doc hasql-pool-effectful-doc
+
+      - name: Upload docs
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: docs
+          path: |
+            hasql-effectful-doc
+            hasql-pool-effectful-doc
+
+  deploy-haddocks:
+    if: github.ref == 'refs/heads/main'
+    needs: test-and-build-docs
+    runs-on: ubuntu-22.04
+
+    # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+    permissions:
+      contents: write
+
+    concurrency:
+      group: ci-${{ github.ref }}
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: docs
+
+      - run: |
+          mkdir doc
+          mv hasql-effectful-doc/share/doc/hasql-effectful/html doc/hasql-effectful/
+          mv hasql-pool-effectful-doc/share/doc/hasql-pool-effectful/html doc/hasql-pool-effectful/
+
+      - name: Dump config for custom domain
+        run: echo 'hasql-effectful.sekun.net' > doc/CNAME
+
+      - name: Deploy haddocks
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./doc
