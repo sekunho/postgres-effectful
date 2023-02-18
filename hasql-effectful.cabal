@@ -59,7 +59,9 @@ library
     import:           warnings
 
     -- Modules exported by the library.
-    exposed-modules: Effectful.Hasql
+    exposed-modules:
+        Effectful.Hasql
+        Effectful.Hasql.Pool
 
     -- Modules included in this library but not exported.
     -- other-modules:
@@ -71,35 +73,10 @@ library
     build-depends:    base ^>=4.16
                     , effectful-core ^>=2.2
                     , hasql ^>=1.6
-
-    -- Directories containing source files.
-    hs-source-dirs:   src
-
-    -- Base language which the package is written in.
-    default-language: Haskell2010
-
-library hasql-pool-effectful
-    -- Import common warning flags.
-    import:           warnings
-
-    -- Modules exported by the library.
-    exposed-modules: Effectful.Hasql.Pool
-
-    -- Modules included in this library but not exported.
-    -- other-modules:
-
-    -- LANGUAGE extensions used by modules in this package.
-    -- other-extensions:
-
-    -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.16
-                    , effectful-core ^>=2.2
-                    , hasql ^>=1.6
-                    , hasql-effectful
                     , hasql-pool ^>=0.8
 
     -- Directories containing source files.
-    hs-source-dirs:   pool-src
+    hs-source-dirs:   src
 
     -- Base language which the package is written in.
     default-language: Haskell2010
@@ -134,7 +111,6 @@ test-suite hasql-effectful-test
       , effectful-core ^>=2.2
       , hasql ^>=1.6
       , hasql-effectful
-      , hasql-pool-effectful
       , hasql-pool ^>=0.8
       , hasql-th ^>=0.4
       , hspec ^>=2.10
