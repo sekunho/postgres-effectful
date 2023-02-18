@@ -66,12 +66,6 @@ jobs:
           nix build .#packages.x86_64-linux.hasql-effectful.doc
           mv result-doc hasql-effectful-doc
 
-      - name: Build `hasql-pool-effectful` docs
-        if: ${{ github.ref == 'refs/heads/main' }}
-        run: |
-          nix build .#packages.x86_64-linux.hasql-pool-effectful.doc
-          mv result-doc hasql-pool-effectful-doc
-
       - name: Upload docs
         if: ${{ github.ref == 'refs/heads/main' }}
         uses: actions/upload-artifact@v3
@@ -79,7 +73,6 @@ jobs:
           name: docs
           path: |
             hasql-effectful-doc
-            hasql-pool-effectful-doc
 
   deploy-haddocks:
     if: github.ref == 'refs/heads/main'
@@ -102,7 +95,6 @@ jobs:
       - run: |
           mkdir doc
           mv hasql-effectful-doc/share/doc/hasql-effectful/html doc/hasql-effectful/
-          mv hasql-pool-effectful-doc/share/doc/hasql-pool-effectful/html doc/hasql-pool-effectful/
 
       - name: Dump config for custom domain
         run: echo 'hasql-effectful.sekun.net' > doc/CNAME
