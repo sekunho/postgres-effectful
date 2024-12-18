@@ -44,30 +44,27 @@ jobs:
             trusted-public-keys = hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= loony-tools:pr9m4BkM/5/eSTZlkQyRt57Jz7OMBxNSUiMC4FkcNfk= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
             substituters = https://cache.iog.io https://cache.zw3rk.com https://cache.nixos.org/
 
-      - name: Build test package
-        run: nix build .#packages.x86_64-linux.hasql-effectful-test
-
       - name: Run tests
-        run: nix run .#packages.x86_64-linux.hasql-effectful-test
+        run: nix develop .#ci -c cabal test
         env:
           POSTGRES_HOST: localhost
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB_NAME: postgres
 
-      - name: Build `hasql-effectful` docs
-        if: ${{ github.ref == 'refs/heads/main' }}
-        run: |
-          nix build .#packages.x86_64-linux.hasql-effectful.doc
-          mv result-doc hasql-effectful-doc
+      # - name: Build `hasql-effectful` docs
+      #   if: ${{ github.ref == 'refs/heads/main' }}
+      #   run: |
+      #     nix build .#packages.x86_64-linux.hasql-effectful.doc
+      #     mv result-doc hasql-effectful-doc
 
-      - name: Upload docs
-        if: ${{ github.ref == 'refs/heads/main' }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: docs
-          path: |
-            hasql-effectful-doc
+      # - name: Upload docs
+      #   if: ${{ github.ref == 'refs/heads/main' }}
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: docs
+      #     path: |
+      #       hasql-effectful-doc
 
   deploy-haddocks:
     if: github.ref == 'refs/heads/main'

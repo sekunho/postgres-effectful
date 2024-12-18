@@ -7,12 +7,13 @@
 
 -------------------------------------------------------------------------------
 
--- | Contains the statically dispatched effect, and relevant functions for a
--- single connection-based DB effect. If you need to take a connection from a
--- pool of connections, you could look into @hasql-pool-effectful@ instead.
---
--- This adapts the @hasql@ package.
-module Effectful.Hasql (DB', query, runDB') where
+{- | Contains the statically dispatched effect, and relevant functions for a
+single connection-based DB effect. If you need to take a connection from a
+pool of connections, you could look into @hasql-pool-effectful@ instead.
+
+This adapts the @hasql@ package.
+-}
+module Effectful.Postgres.Static.Connection (DB', query, runPgConn) where
 
 -------------------------------------------------------------------------------
 
@@ -24,7 +25,7 @@ import Effectful (Dispatch (Static), DispatchOf, Eff, Effect, IOE, type (:>))
 import Effectful.Dispatch.Static (SideEffects (WithSideEffects), StaticRep)
 import qualified Effectful.Dispatch.Static as Static
 import Hasql.Connection (Connection)
-import Hasql.Session (QueryError, Session)
+import Hasql.Session (Session, SessionError)
 import qualified Hasql.Session as Session
 
 -------------------------------------------------------------------------------
@@ -44,16 +45,17 @@ newtype instance StaticRep DB' = DB' Connection
 
 -------------------------------------------------------------------------------
 
--- | Run a @DB'@ effect with the initial representation/environment: a DB
--- connection.
-runDB' ::
+{- | Run a @DB'@ effect with the initial representation/environment: a DB
+connection.
+-}
+runPgConn ::
   forall (es :: [Effect]) (a :: Type).
-  IOE :> es =>
+  (IOE :> es) =>
   -- | Will be put in the initial environment. Represents a single DB connection
   Connection ->
   Eff (DB' : es) a ->
   Eff es a
-runDB' = Static.evalStaticRep . DB'
+runPgConn = Static.evalStaticRep . DB'
 
 unDB :: StaticRep DB' -> Connection
 unDB (DB' connection) = connection
@@ -65,7 +67,7 @@ unDB (DB' connection) = connection
  >>> import Effectful (runEff)
 
  >>> session = Session.statement () [singletonStatement | SELECT 1 :: INT |]
- >>> runEff . runDB' connection $ query session
+ >>> runEff . runPgConn connection $ query session
  Right 1
 -}
 query ::
@@ -73,7 +75,7 @@ query ::
   (DB' :> es) =>
   -- | Database session containing one or more statements
   Session a ->
-  Eff es (Either QueryError a)
+  Eff es (Either SessionError a)
 query session =
   Static.getStaticRep
     >>= Static.unsafeEff_

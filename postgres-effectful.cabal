@@ -1,5 +1,5 @@
 cabal-version:      3.0
-name:               hasql-effectful
+name:               postgres-effectful
 version:            0.1.0.0
 license:            BSD-3-Clause
 license-file:       LICENSE
@@ -17,8 +17,11 @@ library
     import:           warnings
 
     exposed-modules:
-        Effectful.Hasql
-        Effectful.Hasql.Pool
+        Effectful.Postgres
+        Effectful.Postgres.Static.Connection
+        Effectful.Postgres.Static.Pool
+        -- Effectful.Postgres.Dynamic.Connection
+        -- Effectful.Postgres.Dynamic.Pool
     build-depends:    base >=4.18.2.1
                     , effectful-core ^>=2.5
                     , hasql ^>=1.8
@@ -27,11 +30,11 @@ library
 
     default-language: Haskell2010
 
-test-suite hasql-effectful-test
+test-suite postgres-effectful-test
     import:           warnings
     default-language: Haskell2010
-    other-modules: HasqlTest
-                   HasqlPoolTest
+    other-modules: PostgresStaticConnectionTest
+                   PostgresStaticPoolTest
     type:             exitcode-stdio-1.0
     hs-source-dirs:   test
     main-is:          Driver.hs
@@ -40,7 +43,7 @@ test-suite hasql-effectful-test
       , bytestring ^>=0.11
       , effectful-core ^>=2.5
       , hasql ^>=1.8
-      , hasql-effectful
+      , postgres-effectful
       , hasql-pool ^>=1.2
       , hasql-th ^>=0.4
       , hspec ^>=2.11
@@ -50,3 +53,5 @@ test-suite hasql-effectful-test
 
     build-tool-depends:
       tasty-discover:tasty-discover -any
+
+    ghc-options: -threaded
