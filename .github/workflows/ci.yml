@@ -23,7 +23,7 @@ jobs:
       # Label used to access the service container
       postgres:
         # Docker Hub image
-        image: postgres
+        image: postgres:17.1-alpine3.20
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: postgres

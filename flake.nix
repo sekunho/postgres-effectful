@@ -18,7 +18,8 @@
 
                 shell = {
                   buildInputs = with pkgs; [
-                    postgresql.lib
+                    # postgresql_17.lib
+                    pkg-config
                     haskellPackages.implicit-hie
                   ];
 
