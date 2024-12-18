@@ -5,7 +5,7 @@ on:
     paths:
       - '.github/workflows/test.yml'
       - 'flake.*'
-      - 'hasql-effectful.cabal'
+      - 'postgres-effectful.cabal'
       - 'src/**/*'
       - 'pool-src/**/*'
       - 'test/**/*'
@@ -37,26 +37,31 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v30
+      - uses: DeterminateSystems/nix-installer-action@main
         with:
-          extra_nix_config: |
-            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+          extra_conf: |
             trusted-public-keys = hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= loony-tools:pr9m4BkM/5/eSTZlkQyRt57Jz7OMBxNSUiMC4FkcNfk= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
             substituters = https://cache.iog.io https://cache.zw3rk.com https://cache.nixos.org/
-
+      - uses: DeterminateSystems/magic-nix-cache-action@main
       - name: Run tests
-        run: nix develop .#ci -c cabal test
+        run: nix develop .#ci -c cabal update && cabal test
         env:
           POSTGRES_HOST: localhost
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB_NAME: postgres
+      - name: Cache cabal
+        id: cache-cabal
+        uses: actions/cache@v4
+        with:
+          path: dist-newstyle
+          key: ${{ runner.os }}-dist-newstyle
 
-      # - name: Build `hasql-effectful` docs
+      # - name: Build `postgres-effectful` docs
       #   if: ${{ github.ref == 'refs/heads/main' }}
       #   run: |
-      #     nix build .#packages.x86_64-linux.hasql-effectful.doc
-      #     mv result-doc hasql-effectful-doc
+      #     nix build .#packages.x86_64-linux.postgres-effectful.doc
+      #     mv result-doc postgres-effectful-doc
 
       # - name: Upload docs
       #   if: ${{ github.ref == 'refs/heads/main' }}
@@ -64,35 +69,35 @@ jobs:
       #   with:
       #     name: docs
       #     path: |
-      #       hasql-effectful-doc
+      #       postgres-effectful-doc
 
-  deploy-haddocks:
-    if: github.ref == 'refs/heads/main'
-    needs: test-and-build-docs
-    runs-on: ubuntu-latest
+  # deploy-haddocks:
+  #   if: github.ref == 'refs/heads/main'
+  #   needs: test-and-build-docs
+  #   runs-on: ubuntu-latest
 
-    # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-    permissions:
-      contents: write
+  #   # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+  #   permissions:
+  #     contents: write
 
-    concurrency:
-      group: ci-${{ github.ref }}
+  #   concurrency:
+  #     group: ci-${{ github.ref }}
 
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: docs
+  #   steps:
+  #     - name: Download artifact
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: docs
 
-      - run: |
-          mkdir doc
-          mv hasql-effectful-doc/share/doc/hasql-effectful/html doc/hasql-effectful/
+  #     - run: |
+  #         mkdir doc
+  #         mv postgres-effectful-doc/share/doc/postgres-effectful/html doc/postgres-effectful/
 
-      - name: Dump config for custom domain
-        run: echo 'hasql-effectful.sekun.net' > doc/CNAME
+  #     - name: Dump config for custom domain
+  #       run: echo 'hasql-effectful.sekun.net' > doc/CNAME
 
-      - name: Deploy haddocks
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./doc
+  #     - name: Deploy haddocks
+  #       uses: peaceiris/actions-gh-pages@v3
+  #       with:
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
+  #         publish_dir: ./doc

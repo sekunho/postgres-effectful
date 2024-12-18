@@ -36,7 +36,7 @@
               '';
 
               initialDatabases = [
-                { name = "test_db"; schemas = []; }
+                { name = "test_db"; schemas = [ ]; }
               ];
             };
           };
@@ -57,11 +57,24 @@
                   haskellPackages.cabal-fmt
 
                   pkgs.postgresql_17
-                  pkgs.sqlite
                   pkgs.watchexec
                   pkgs.zlib
                   pkgs.git
                   pkgs.nil
+                  pkgs.nixpkgs-fmt
+                ];
+              };
+
+            ci =
+              haskellPackages.shellFor {
+                packages = p: [];
+
+                buildInputs = [
+                  haskellPackages.fourmolu
+                  haskellPackages.cabal-install
+                  haskellPackages.cabal-fmt
+
+                  pkgs.zlib
                   pkgs.nixpkgs-fmt
                 ];
               };
