@@ -3,12 +3,6 @@
   inputs.nixpkgs.follows = "haskellNix/nixpkgs-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
 
-  nixConfig = {
-    extra-substituters = ["https://cache.iog.io"];
-    extra-trusted-public-keys = ["hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="];
-    # allow-import-from-derivation = "true";
-  };
-
   outputs = { self, nixpkgs, flake-utils, haskellNix }:
     flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-darwin" ] (system:
       let
@@ -30,7 +24,7 @@
 
                   tools = {
                     cabal = {};
-                    # hlint = {};
+                    hlint = {};
                     haskell-language-server = {};
                     fourmolu = {};
                   };
