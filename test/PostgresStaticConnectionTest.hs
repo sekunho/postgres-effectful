@@ -9,7 +9,7 @@
 
 -------------------------------------------------------------------------------
 
-module HasqlPoolTest where
+module PostgresStaticConnectionTest where
 
 -------------------------------------------------------------------------------
 
@@ -21,15 +21,13 @@ import qualified System.Environment as Environment (lookupEnv)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as Char8 (pack)
 import Effectful (runEff)
-import Effectful.Hasql.Pool
-import Hasql.Connection (Connection, Settings, acquire)
+import Effectful.Postgres.Static.Connection (query, runPgConn)
+import Hasql.Connection (Connection, acquire)
 import qualified Hasql.Connection as Connection
-import Hasql.Pool (Pool, UsageError (SessionUsageError))
-import qualified Hasql.Pool as Pool
 import Hasql.Session (
   CommandError (ResultError),
-  QueryError (QueryError),
   ResultError (ServerError),
+  SessionError (QueryError),
  )
 import qualified Hasql.Session as Session
 import Hasql.TH (singletonStatement)
@@ -54,25 +52,23 @@ test_select = testSpec "test" selectSpec
 
 selectSpec :: Spec
 selectSpec = do
-  describe "select using pool" $ do
+  describe "select" $ do
     it "is 1" $
       (setup >>= select1) `shouldReturn` Right 1
 
     it "is dead" $
       (setup >>= badSelect)
         `shouldReturn` Left
-          ( SessionUsageError
-              ( QueryError
-                  "SELECT col_404 :: INT FROM table_404"
-                  []
-                  ( ResultError
-                      ( ServerError
-                          "42P01"
-                          "relation \"table_404\" does not exist"
-                          Nothing
-                          Nothing
-                          (Just 28)
-                      )
+          ( QueryError
+              "SELECT col_404 :: INT FROM table_404"
+              []
+              ( ResultError
+                  ( ServerError
+                      "42P01"
+                      "relation \"table_404\" does not exist"
+                      Nothing
+                      Nothing
+                      (Just 28)
                   )
               )
           )
@@ -80,33 +76,32 @@ selectSpec = do
 -------------------------------------------------------------------------------
 -- Queries
 
-select1 :: Pool -> IO (Either UsageError Int32)
-select1 pool =
-  runEff . runDB pool $
+select1 :: Connection -> IO (Either SessionError Int32)
+select1 connection =
+  runEff . runPgConn connection $
     let session = Session.statement () [singletonStatement| select 1 :: int |]
-     in use session
+     in query session
 
-badSelect :: Pool -> IO (Either UsageError Int32)
-badSelect pool =
-  runEff . runDB pool $
+badSelect :: Connection -> IO (Either SessionError Int32)
+badSelect connection =
+  runEff . runPgConn connection $
     let session =
           Session.statement
             ()
             [singletonStatement| SELECT col_404 :: INT from table_404 |]
-     in use session
+     in query session
 
 -------------------------------------------------------------------------------
 -- Helpers
 
-getPool :: Settings -> Int -> IO Pool
-getPool settings poolCapacity = Pool.acquire poolCapacity Nothing settings
-
-setup :: IO Pool
+setup :: IO Connection
 setup = do
   testEnv <- getTestEnv
-  pool <- getPool (mkSettings testEnv) 1
+  connection <- acquire (mkSettings testEnv)
 
-  pure pool
+  case connection of
+    Right connection' -> pure connection'
+    Left e -> error (show e)
  where
   mkSettings (MkTestEnv dbHost dbUser dbPassword dbName) =
     Connection.settings dbHost 5432 dbUser dbPassword dbName

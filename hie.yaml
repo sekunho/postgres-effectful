@@ -1,10 +1,10 @@
 cradle:
   cabal:
     - path: "src"
-      component: "lib:hasql-effectful"
+      component: "lib:postgres-effectful"
 
     - path: "pool-src"
-      component: "hasql-effectful:lib:hasql-pool-effectful"
+      component: "postgres-effectful:lib:postgres-pool-effectful"
 
     - path: "test"
-      component: "hasql-effectful:test:hasql-effectful-test"
+      component: "postgres-effectful:test:postgres-effectful-test"
