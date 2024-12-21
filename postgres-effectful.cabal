@@ -1,0 +1,57 @@
+cabal-version:      3.0
+name:               postgres-effectful
+version:            0.1.0.0
+license:            BSD-3-Clause
+license-file:       LICENSE
+author:             sekun
+maintainer:         sekun@duck.com
+category:           Database
+build-type:         Simple
+
+extra-doc-files:    CHANGELOG.md
+
+common warnings
+    ghc-options: -Wall
+
+library
+    import:           warnings
+
+    exposed-modules:
+        Effectful.Postgres
+        Effectful.Postgres.Static.Connection
+        Effectful.Postgres.Static.Pool
+        -- Effectful.Postgres.Dynamic.Connection
+        -- Effectful.Postgres.Dynamic.Pool
+    build-depends:    base >=4.18.2.1
+                    , effectful-core ^>=2.5
+                    , hasql ^>=1.8
+                    , hasql-pool ^>=1.2
+    hs-source-dirs:   src
+
+    default-language: Haskell2010
+
+test-suite postgres-effectful-test
+    import:           warnings
+    default-language: Haskell2010
+    other-modules: PostgresStaticConnectionTest
+                   PostgresStaticPoolTest
+    type:             exitcode-stdio-1.0
+    hs-source-dirs:   test
+    main-is:          Driver.hs
+    build-depends:
+        base >=4.18.2.1
+      , bytestring ^>=0.11
+      , effectful-core ^>=2.5
+      , hasql ^>=1.8
+      , postgres-effectful
+      , hasql-pool ^>=1.2
+      , hasql-th ^>=0.4
+      , hspec ^>=2.11
+      , tasty ^>=1.5
+      , tasty-hspec ^>=1.2
+      , tasty-discover ^>=5.0
+
+    build-tool-depends:
+      tasty-discover:tasty-discover -any
+
+    ghc-options: -threaded

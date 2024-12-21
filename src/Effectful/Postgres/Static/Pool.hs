@@ -12,7 +12,7 @@
 -- you could look into @hasql-effectful@ instead.
 --
 -- This adapts the @hasql-pool@ package.
-module Effectful.Hasql.Pool (DB, use, runDB) where
+module Effectful.Postgres.Static.Pool (DB, use, runPgPool) where
 
 -------------------------------------------------------------------------------
 
@@ -43,14 +43,14 @@ newtype instance StaticRep DB = DB Pool
 -------------------------------------------------------------------------------
 
 -- | Run a @DB@ effect with the initial representation/environment: a DB pool.
-runDB ::
+runPgPool ::
   forall (es :: [Effect]) (a :: Type).
   IOE :> es =>
   -- | Will be put in the initial environment. Represents a DB pool of connections
   Pool ->
   Eff (DB : es) a ->
   Eff es a
-runDB = Static.evalStaticRep . DB
+runPgPool = Static.evalStaticRep . DB
 
 -- | Use a connection from the pool to run a DB session, and returns it to the
 -- pool when finished.
